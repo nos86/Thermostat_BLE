@@ -1,0 +1,30 @@
+[
+    {"id":0, "name": "overview", "components":[
+        {"type": "number", "id":11, "name": "program"},
+        {"type": "text", "id":8, "name":"date"},
+        {"type": "text", "id":7, "name":"time"},
+        {"type": "text", "id":29, "name":"target"},
+        {"type": "number", "id":24, "name":"out_temp"},
+        {"type": "number", "id":25, "name":"out_hum"}
+    ]},
+    {"id":1, "name": "menu", "components":[]},
+    {"id":2, "name": "bedroom", "components":[
+        {"type": "number", "id":1, "name": "battery", "global":true},
+        {"type": "waveform", "id":2, "name": "chart", "global":true},
+        {"type": "number", "id":3, "name": "temperature", "global":true},
+        {"type": "number", "id":4, "name": "humidity", "global":true},
+        {"type": "number", "id":9, "name": "online", "global":true}
+    ]},
+    {"id":3, "name": "bathroom", "components":[
+        {"type": "number", "id":1, "name": "battery", "global":true},
+        {"type": "waveform", "id":2, "name": "chart", "global":true},
+        {"type": "number", "id":3, "name": "temperature", "global":true},
+        {"type": "number", "id":4, "name": "humidity", "global":true},
+        {"type": "number", "id":9, "name": "online", "global":true}
+    ]},
+    {"id":4, "name": "setpoints", "components":[]},
+    {"id":5, "name": "advanced", "components":[]},
+    {"id":6, "name": "override", "components":[]},
+    {"id":7, "name": "override2", "components":[]},
+    {"id":8, "name": "schedule", "components":[]}
+]
