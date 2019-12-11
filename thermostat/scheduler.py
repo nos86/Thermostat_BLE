@@ -69,6 +69,17 @@ class Scheduler:
                 next_temperature = today_program[next_time]
         return current_temperature, next_time, next_temperature
 
+    def moveToNextDay(self, is_tomorrow_working=True):
+        self.is_yesterday_working = self.is_today_working
+        self.is_today_working = self.is_tomorrow_working
+        self.is_tomorrow_working = is_tomorrow_working
+    
+    def overrideToday(self, is_working):
+        self.is_today_working = is_working
+
+    def overrideTomorrow(self, is_working):
+        self.is_tomorrow_working = is_working
+
     def dump(self):
         data = {
             'temperature':{
