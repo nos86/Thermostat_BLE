@@ -1,11 +1,18 @@
 [
     {"id":0, "name": "overview", "components":[
         {"type": "number", "id":11, "name": "program"},
+        {"type": "number", "id":14, "name": "prg_home"},
+        {"type": "number", "id":13, "name": "prg_away"},
+        {"type": "number", "id":3, "name": "prg_vacation"},
         {"type": "text", "id":8, "name":"date"},
         {"type": "text", "id":7, "name":"time"},
-        {"type": "text", "id":29, "name":"target"},
+        {"type": "number", "id":27, "name":"target"},
+        {"type": "text", "id":6, "name":"endtime"},
         {"type": "number", "id":24, "name":"out_temp"},
-        {"type": "number", "id":25, "name":"out_hum"}
+        {"type": "number", "id":25, "name":"out_hum"},
+        {"type": "number", "id":16, "name":"heater"},
+        {"type": "number", "id":17, "name":"override"}
+
     ]},
     {"id":1, "name": "menu", "components":[]},
     {"id":2, "name": "bedroom", "components":[

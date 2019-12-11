@@ -1,3 +1,4 @@
+import utime
 
 class Setpoint:
     def __init__(self, value):
@@ -48,7 +49,10 @@ class Scheduler:
         self.is_today_working = True
         self.is_tomorrow_working = True
 
-    def getSetpoint(self, time):
+    def getSetpoint(self, time=None):
+        if time is None:
+            (_,_,_,hr, mn, _,_,_) = utime.localtime()
+            time = hr * 60 + mn
         yesterday_program = self.schedule_working_days if self.is_today_working else self.schedule_holidays
         today_program = self.schedule_working_days if self.is_today_working else self.schedule_holidays
         tomorrow_program = self.schedule_working_days if self.is_tomorrow_working else self.schedule_holidays

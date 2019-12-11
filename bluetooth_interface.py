@@ -2,7 +2,6 @@ import bluetooth
 import ubinascii
 import time
 from micropython import const
-from thermometer import xiaomi
 
 bt = bluetooth.BLE()
 

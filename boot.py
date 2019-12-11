@@ -17,9 +17,12 @@ import json
 import nextion
 from thermostat import Thermostat
 
-driver = nextion.Driver()
+driver = nextion.Driver(timer=machine.Timer(1))
 
 with open("nextion.json", "r") as fp:
     data = json.loads(fp.read())
+
+with open("programs.json", "r") as fp:
+    program = json.loads(fp.read())
 
 driver.pages = [nextion.Page.new_page_by_specification(driver, s) for s in data]
