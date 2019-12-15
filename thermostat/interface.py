@@ -38,7 +38,8 @@ class Thermostat:
             "program": self.nextion.getComponentByPath("overview.program")
         }
         #Variable initialization
-        self.__override = False
+        self.__override_temperature = None
+        self.__override_next_time = None
         self.__current_setpoint = None
         self.__next_schedule_time = None
         self.__last_date_update = 0
@@ -78,9 +79,9 @@ class Thermostat:
     def set_mode(self, mode):
         self.__current_mode = mode
         self.label['program'].set(0 if mode=="home" else (1 if mode=="away" else 2))
-        self.updateSetpoints(force=True)
+        self.update_setpoints(force=True)
 
-    def periodicUpdate(self):
+    def periodic_update(self):
         (_, mo, dd, hr, mn, _, wd, _) = utime.localtime()
         weekday = ['LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB', 'DOM'][wd]
         self.label['time'].set("{:02d}:{:02d}".format(hr, mn))
@@ -88,12 +89,38 @@ class Thermostat:
         self.label['endtime'].set("fino alle {}:{}".format(int(self.__next_schedule_time/60), self.__next_schedule_time%60))
         self.label['target'].set(10*self.__current_setpoint)
 
-    def updateSetpoints(self, force = False):
-        current_setpoint, next_time, _ = self.schedule[self.__current_mode].getSetpoint()
+    def extend_setpoint_to_next(self):
+        _, next_time, _ = self.schedule[self.__current_mode].getSetpoint(time=self.__next_schedule_time)
+        self.set_override(self.__current_setpoint, next_time)
+
+    def anticipate_next_setpoint(self):
+        _, next_time, next_temperature = self.schedule[self.__current_mode].getSetpoint()
+        self.set_override(next_temperature, next_time)
+
+    def set_override_for_duration(self, temperature, duration):
+        (_,_,_,hr, mn, _,_,_) = utime.localtime()
+        time = hr * 60 + mn + duration
+        time -= 1440 if time > 1440 else 0
+        self.set_override(temperature, time)
+
+    def set_override(self, temperature, next_time):
+        self.__override_temperature = temperature
+        self.__override_next_time = next_time
+        self.update_setpoints()
+    
+    def clear_override(self):
+        self.set_override(None, None)
+
+    def update_setpoints(self, force = False):
+        if self.__override_temperature is not None:
+            current_setpoint = self.__override_temperature
+            next_time = self.__override_next_time
+        else:
+            current_setpoint, next_time, _ = self.schedule[self.__current_mode].getSetpoint()
         if(current_setpoint.value != self.__current_setpoint) or (next_time != self.__next_schedule_time) or force:
             self.__current_setpoint = current_setpoint.value
             self.__next_schedule_time = next_time
-            self.periodicUpdate()
+            self.periodic_update()
             return True
         else:
             return False
