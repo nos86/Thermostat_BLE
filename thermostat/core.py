@@ -16,6 +16,8 @@ class Logic:
 
     def setCurrentTemperature(self, value, ignoreMinTime=False):
         self.current = value
+        if self.setpoint is None:
+            return
         if self.state == False and self.current < self.setpoint - self.hysteresis:
             self.__setState(True)
         elif self.isMinimumOnTimeElapsed and self.current > self.setpoint + self.hysteresis:
