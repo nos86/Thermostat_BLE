@@ -3,6 +3,7 @@ import ubinascii
 
 class UART(machine.UART):
     debug=False
+    background_listener=False
     ERRORS = {
         b'\x00' : "Invalid instruction",
         # 0x01 : "Successful execution of instruction",
@@ -21,6 +22,19 @@ class UART(machine.UART):
         b'\x20' : "Undefined escape characters",
         b'\x23' : "Too long variable name",
     }
+
+    def set_background_listener(self, timer, callback):
+        self.timer = timer.init(period=100, mode=machine.Timer.PERIODIC, callback=self.check_incoming_data)
+        self.background_listener = True
+        self.callback = callback
+
+    def check_incoming_data(self, event):
+        if self.background_listener == False:
+            return
+        if self.any():
+            data = self._read_internal()
+            if data:
+                self.callback(data)
 
     @staticmethod
     def get_nx_error_message(err_code_char):
@@ -45,11 +59,15 @@ class UART(machine.UART):
     def write(self, message, read_feedback=False, check_return=True):
         message = message.encode()
         message += b"\xFF\xFF\xFF"
+        self.background_listener = False
+        self.flush()
         super().write(message)
         if read_feedback:
-            return self.read(check_return=check_return)
+            data =  self.read(check_return=check_return)
         else:
-            return None
+            data =  None
+        self.background_listener = True
+        return data
 
     def read(self, check_return=True):
         bytes_buf = self._read_internal()
@@ -65,7 +83,7 @@ class UART(machine.UART):
                 self.get_nx_error_message(fbyte),
                 bytes_buf
                 ))
-
+        #TODO: check if switch cases below are really usefull
         if fbyte == 0x01:
             return bytes_buf
         elif fbyte == 0x65:  # Touch event return data

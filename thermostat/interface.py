@@ -44,10 +44,6 @@ class Thermostat:
             temp = json.load(fp)
         for mode in ['home', 'away', 'vacation']:
             self.schedule[mode] = Scheduler(mode, temp[mode]) #FIXME: setup working day
-        self.nextion.register_listener("overview.prg_home".format(mode), lambda x: self.set_mode("home"))
-        self.nextion.register_listener("overview.prg_away".format(mode), lambda x: self.set_mode("away"))
-        self.nextion.register_listener("overview.prg_vacation".format(mode), lambda x: self.set_mode("vacation"))
-
         self.relay = HeatingRelay(self.nextion.getComponentByPath("overview.heater"), 25.0, 0.5, minTimeOn=0)
 
         self.bluetooth = BluetoothManager()

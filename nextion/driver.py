@@ -1,4 +1,5 @@
 from .uart import UART
+import machine
 
 class Driver(object):
     RED    = 63488
@@ -10,11 +11,44 @@ class Driver(object):
     BROWN  = 48192
     YELLOW = 65504
 
-    def __init__(self, timeout=None, tx=17, rx=16, baudrate=9600):
+    def __init__(self, timeout=None, tx=17, rx=16, baudrate=9600, timer=None):
         read_timeout = timeout if timeout is not None else 100
         self.uart = UART(1,baudrate,tx=tx,rx=rx, timeout=read_timeout)
         self.uart.flush()
+        if timer:
+            self.uart.set_background_listener(timer, self.display_event)
+        self.registered_events = {}
         self.pages = []
+
+    def register_listener(self, path, callback):
+        (page_id, component_id) = self.getPageAndComponentIdByPath(path)
+        if page_id not in self.registered_events.keys():
+            self.registered_events[page_id] = {}
+        self.registered_events[page_id][component_id] = callback
+
+    def unregister_listener(self, path):
+        (page_id, component_id) = self.getPageAndComponentIdByPath(path)
+        del self.registered_events[page_id][component_id]
+
+    def display_event(self,event):
+        if event[0] != b'\x65':
+            return
+        page_id = ord(event[1])
+        component_id = ord(event[2])
+        if page_id in self.registered_events.keys():
+            if component_id in self.registered_events[page_id]:
+                self.registered_events[page_id][component_id](ord(event[3]))
+
+    def getPageAndComponentIdByPath(self, fullpath):
+        [page, component] = fullpath.split('.')
+        for p in self.pages:
+            if p.name == page:
+                page_id = p.number
+                for c in p.components:
+                    if c.name == component:
+                        component_id = c.comp_id
+                        return page_id, component_id
+        return None, None
 
     def getComponentByPath(self, fullpath):
         [page, component] = fullpath.split('.')
