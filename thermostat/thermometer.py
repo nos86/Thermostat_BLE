@@ -43,19 +43,3 @@ class xiaomi:
             return False
         self.last_message = time.ticks_ms()
         return True
-
-class xiaomiOnNextion(xiaomi):
-    def __init__(self, mac, t_comp, h_comp, b_comp, online_comp):
-        super().__init__(mac)
-        self.t_comp = t_comp
-        self.h_comp = h_comp
-        self.b_comp = b_comp
-        self.online_comp = online_comp
-        self.online_comp.set(1)
-        
-    
-    def decode_advertising(self, adv_data):
-        super().decode_advertising(adv_data)
-        self.t_comp.set(int(self.temperature * 10) if self.temperature else 0)
-        self.h_comp.set(int(self.humidity * 10)if self.humidity else 0)
-        self.b_comp.set(self.battery if self.battery else 0)
