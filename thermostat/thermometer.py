@@ -1,5 +1,5 @@
 import ubinascii
-import time
+import utime
 
 class xiaomi:
     def __init__(self, mac):
@@ -15,7 +15,7 @@ class xiaomi:
         self.humidity = None
         self.battery = None
         self.rssi = 0
-        self.last_message = time.ticks_ms()
+        self.last_message = utime.time()
 
     def setRSSI(self, value):
         self.rssi = value
@@ -24,7 +24,7 @@ class xiaomi:
         return ubinascii.hexlify(self.mac,':').decode()
 
     def getTimeSinceLastUpdate(self):
-        return time.ticks_diff(time.ticks_ms(), self.last_message)/1000
+        return (utime.time() - self.last_message)
 
     def decode_advertising(self, adv_data):
         n = adv_data[11]
