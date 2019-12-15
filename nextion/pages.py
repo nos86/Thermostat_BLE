@@ -17,7 +17,6 @@ class Page(object):
 		return page
 
 	def component_by_name(self, name):
-		result = None
 		for component in self.components:
 			if name == component.name:
 				return component

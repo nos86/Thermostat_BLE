@@ -93,8 +93,7 @@ class Thermostat:
             return True
         else:
             return False
-    
-     
+
     def timer_irq(self):
         pass
 
