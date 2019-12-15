@@ -53,14 +53,14 @@ class Driver(object):
             return (b"".join(txt[1:])).decode('utf-8', "ignore")
 
     def setValue(self, obj, value):
-        txt = "b[{}].val={}" if isinstance(obj, int) else '{}.val={}'
-        return self.uart.write(txt.format(obj, value))
+        msg = "b[{}].val={}" if isinstance(obj, int) else '{}.val={}'
+        return self.uart.write(msg.format(obj, int(value)))
     
     def getValue(self, obj):
-        txt = 'get b[{}].txt' if isinstance(obj, int) else 'get {}.txt'
-        txt = self.uart.write(txt.format(obj), read_feedback=True, check_return=False)
-        if txt[0] == b'\x71':
-            return (b"".join(txt[1:])).decode()
+        msg = 'get b[{}].val' if isinstance(obj, int) else 'get {}.val'
+        msg = self.uart.write(msg.format(obj), read_feedback=True, check_return=False)
+        if msg[0] == b'\x71':
+            return ord(msg[1]) + 256*ord(msg[2]) + 65536*ord(msg[3]) + 16777216*ord(msg[4])
 
     def clear(self, color):
         self.uart.write('cls %s' % color)
