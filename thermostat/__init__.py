@@ -1,2 +1,2 @@
 #from .scheduler import Scheduler
-from .core import Thermostat 
+from .core import SensorLogic, MultiSensorLogic 

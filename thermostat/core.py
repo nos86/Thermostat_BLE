@@ -1,8 +1,8 @@
 import machine
 import utime
 
-class Logic:
-    def __init__(self, stateCallback, hysteresis, pin=18, minTimeOn=30):
+class SensorLogic:
+    def __init__(self, stateCallback=None, hysteresis=0.5, pin=18, minTimeOn=30):
         self.stateCallback = stateCallback
         self.setpoint = None
         self.current = None
@@ -12,13 +12,20 @@ class Logic:
         self.lastActivation = utime.time()
         self.lastReading = utime.time()
         self.pin = machine.Pin(pin, machine.Pin.OPEN_DRAIN)
-        self.__setState(False)
+        self.lastActivation = utime.time()
+        self.state = False
+        self.pin.value(True)
+
+    def periodic_check(self):
+        self.setCurrentTemperature(self.current)
 
     def setCurrentTemperature(self, value, ignoreMinTime=False):
         self.current = value
-        if self.setpoint is None:
+        if (self.setpoint is None) or (self.current is None):
             return
-        if self.state == False and self.current < self.setpoint - self.hysteresis:
+        if self.isReadingUpdated() == False:
+            self.__setState(False)
+        elif self.state == False and self.current < self.setpoint - self.hysteresis:
             self.__setState(True)
         elif self.isMinimumOnTimeElapsed and self.current > self.setpoint + self.hysteresis:
             self.__setState(False)
@@ -34,7 +41,8 @@ class Logic:
             self.state = active
             self.pin.value(active==False)
             self.lastActivation = utime.time()
-            self.stateCallback(self.state)
+            if self.stateCallback:
+                self.stateCallback(self.state)
 
     def isReadingUpdated(self):
         return utime.time()-self.lastReading < 300
@@ -48,22 +56,26 @@ class Logic:
         else:
             return 0
 
-class MultiSensorLogic(Logic):
-    def __init__(self, stateCallback, hysteresis, pin=18, minTimeOn=30, numberOfSensors=2):
+class MultiSensorLogic(SensorLogic):
+    def __init__(self, stateCallback=None, hysteresis=0.5, pin=18, minTimeOn=30, numberOfSensors=2):
         super().__init__(stateCallback, hysteresis, pin=pin, minTimeOn=minTimeOn)
         self.lastReading = [utime.time()] * numberOfSensors
-        self.reading = [None] * numberOfSensors
+        self.reading = [None] * numberOfSensors #New variable that handles multi-sensors
         self.numberOfSensors = numberOfSensors
+        
 
-    def setCurrentTemperature(self, sensor_id, value, ignoreMinTime=False):
-        self.reading[sensor_id] = value
-        self.lastReading[sensor_id] = utime.time()
-        self.reads = [self.reading[id] for id in range(self.numberOfSensors) if self.reading[id] is not None and self.isReadingUpdated(id)]
-        reads = list(filter(lambda x:x is not None, self.reading))
-        value = sum(reads)/len(reads)
+    def setCurrentTemperature(self, value, sensor_id = -1, ignoreMinTime=False):
+        if sensor_id > -1:
+            self.reading[sensor_id] = value
+            self.lastReading[sensor_id] = utime.time()
+            reads = [self.reading[id] for id in range(self.numberOfSensors) if self.reading[id] is not None and self.isReadingUpdated(id)]
+            value = sum(reads)/len(reads)
         return super().setCurrentTemperature(value, ignoreMinTime=ignoreMinTime)
 
     def isReadingUpdated(self, sensor_id=-1):
-        if sensor_id < 0:
-            return any([utime.time()-self.lastReading[sensor_id] < 300 for sensor_id in range(self.numberOfSensors)])
-        return utime.time()-self.lastReading[sensor_id] < 300
+        if sensor_id > -1:
+            time = self.lastReading[sensor_id]
+            return False if time is None else utime.time() - time < 300
+        else:
+            return any([self.isReadingUpdated(sensor_id) for sensor_id in range(self.numberOfSensors)])
+        
