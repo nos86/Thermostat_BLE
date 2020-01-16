@@ -61,7 +61,7 @@ class Thermostat:
         self.bluetooth.addDevice(self.bedroom.mac, lambda adv, rssi: self.bt_irq(self.bedroom, adv, rssi))
 
         self.bathroom = None
-        # xiaomiOnNextion(b'Le\xa8\xdd\xd4L' #TODO: use new MAC
+        # xiaomiOnNextion(b'Le\xa8\xdd\xd4L' # TODO: use new MAC
         #                            , self.nextion.getComponentByPath("bathroom.temperature")
         #                            , self.nextion.getComponentByPath("bathroom.humidity")
         #                            , self.nextion.getComponentByPath("bathroom.battery")
@@ -86,8 +86,13 @@ class Thermostat:
         weekday = ['LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB', 'DOM'][wd]
         self.label['time'].set("{:02d}:{:02d}".format(hr, mn))
         self.label['date'].set("{:02d}/{:02d} {}".format(dd, mo, weekday))
-        self.label['endtime'].set("fino alle {}:{}".format(int(self.__next_schedule_time/60), self.__next_schedule_time%60))
+        self.update_setpoints()
+        self.label['endtime'].set("FINO ALLE {}:{}".format(int(self.__next_schedule_time/60), self.__next_schedule_time%60))
         self.label['target'].set(10*self.__current_setpoint)
+        self.logic.periodic_check()
+
+    def displayScheduler(self):
+        pass
 
     def extend_setpoint_to_next(self):
         _, next_time, _ = self.schedule[self.__current_mode].getSetpoint(time=self.__next_schedule_time)
@@ -98,8 +103,7 @@ class Thermostat:
         self.set_override(next_temperature, next_time)
 
     def set_override_for_duration(self, temperature, duration):
-        (_,_,_,hr, mn, _,_,_) = utime.localtime()
-        time = hr * 60 + mn + duration
+        time = self.__getTime() + duration
         time -= 1440 if time > 1440 else 0
         self.set_override(temperature, time)
 
@@ -111,8 +115,14 @@ class Thermostat:
     def clear_override(self):
         self.set_override(None, None)
 
+    def __getTime(self):
+        (_,_,_,hr, mn, _,_,_) = utime.localtime()
+        return hr * 60 + mn
+
     def update_setpoints(self, force = False):
-        if self.__override_temperature is not None:
+        if self.__override_temperature is not None and self.__getTime() == self.__override_next_time:
+            self.clear_override()
+        elif self.__override_temperature is not None:
             current_setpoint = self.__override_temperature
             next_time = self.__override_next_time
         else:
@@ -133,4 +143,4 @@ class Thermostat:
             obj.decode_advertising(adv_message)
             obj.rssi = rssi
             self.logic.setCurrentTemperature(self.BEDROOM_SENSOR_NO if obj == self.bedroom else self.BATHROOM_SENSOR_NO, obj.temperature)
-            
+

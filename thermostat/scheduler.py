@@ -73,6 +73,14 @@ class Scheduler:
                 next_temperature = today_program[next_time]
         return current_temperature, next_time, next_temperature
 
+    def displayScheduling(self, holiday=False):
+        schedule = self.schedule_holidays if holiday else self.schedule_working_days
+        schedule_time = list(schedule.keys()).sort()
+        data = [schedule[schedule_time[-1]]] * 24
+        for t in schedule_time:
+            pass
+
+
     def moveToNextDay(self, is_tomorrow_working=True):
         self.is_yesterday_working = self.is_today_working
         self.is_today_working = self.is_tomorrow_working

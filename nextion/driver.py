@@ -1,5 +1,6 @@
 from .uart import UART
-import machine
+from .pages import Page
+import machine # pylint: disable=import-error
 
 class Driver(object):
     RED    = 63488
@@ -19,6 +20,19 @@ class Driver(object):
             self.uart.set_background_listener(timer, self.display_event)
         self.registered_events = {}
         self.pages = []
+
+    def loadPage(self, spec):
+        page = Page.new_page_by_specification(self, spec)
+        pages_name = list(map(lambda x: x.name, self.pages))
+        if page.name in pages_name:
+            print(r"Overriding previous definition for page {page.name}")
+            self.pages[pages_name.index(page.name)] = page
+        else:
+            self.pages.append(page)
+
+    def loadPages(self, specs):
+        for spec in specs:
+            self.loadPage(spec)
 
     def register_listener(self, path, callback):
         (page_id, component_id) = self.getPageAndComponentIdByPath(path)

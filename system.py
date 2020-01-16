@@ -13,5 +13,5 @@ try:
 except:
     print("Unable to retrieve local time")
 
-t = Thermostat()
+t = Thermostat(driver)
 

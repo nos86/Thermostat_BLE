@@ -1,5 +1,5 @@
-import machine
-import ubinascii
+import machine # pylint: disable=import-error
+import ubinascii # pylint: disable=import-error
 
 class UART(machine.UART):
     debug=False

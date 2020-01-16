@@ -13,9 +13,9 @@ elif rst_cause == machine.WDT_RESET:
 
 
 import json
-
 import nextion
-from thermostat import Thermostat
+from thermostat import MultiSensorLogic
+from thermostat.interface import Thermostat
 
 driver = nextion.Driver(timer=machine.Timer(1))
 
@@ -25,4 +25,4 @@ with open("nextion.json", "r") as fp:
 with open("programs.json", "r") as fp:
     program = json.loads(fp.read())
 
-driver.pages = [nextion.Page.new_page_by_specification(driver, s) for s in data]
+driver.loadPages(data)
