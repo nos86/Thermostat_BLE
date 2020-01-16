@@ -22,9 +22,9 @@ class xiaomiOnNextion(xiaomi):
         self.b_comp.set(self.battery if self.battery else 0)
 
 class Thermostat:
-    BEDROOM_SENSOR_NO = 1
-    BATHROOM_SENSOR_NO = 2
-    def __init__(self, nextion_driver, schedule_path ="/programs.json", bedroom_mac = b'Le\xa8\xdd\xd4L', bathroom_mac = b'0000'):
+    BEDROOM_SENSOR_NO = 0
+    BATHROOM_SENSOR_NO = 1
+    def __init__(self, nextion_driver, schedule_path ="/programs.json", bedroom_mac = b'Le\xa8\xdd\xd4L', bathroom_mac = b'X-41\xac\x9f'):
         self.nextion = nextion_driver
         self.label = {
             "date" : self.nextion.getComponentByPath("overview.date"),
@@ -53,25 +53,24 @@ class Thermostat:
 
         self.bluetooth = BluetoothManager()
         
-        self.bedroom  = xiaomiOnNextion(b'Le\xa8\xdd\xd4L'
+        self.bedroom  = xiaomiOnNextion(bedroom_mac
                                     , self.nextion.getComponentByPath("bedroom.temperature")
                                     , self.nextion.getComponentByPath("bedroom.humidity")
                                     , self.nextion.getComponentByPath("bedroom.battery")
                                     , self.nextion.getComponentByPath("bedroom.online"))
         self.bluetooth.addDevice(self.bedroom.mac, lambda adv, rssi: self.bt_irq(self.bedroom, adv, rssi))
 
-        self.bathroom = None
-        # xiaomiOnNextion(b'Le\xa8\xdd\xd4L' # TODO: use new MAC
-        #                            , self.nextion.getComponentByPath("bathroom.temperature")
-        #                            , self.nextion.getComponentByPath("bathroom.humidity")
-        #                            , self.nextion.getComponentByPath("bathroom.battery")
-        #                            , self.nextion.getComponentByPath("bathroom.online")) 
-        #self.bluetooth.addDevice(self.bathroom.mac, lambda adv, rssi: self.bt_irq(self.bathroom, adv, rssi))
+        self.bathroom = xiaomiOnNextion(bathroom_mac
+                                    , self.nextion.getComponentByPath("bathroom.temperature")
+                                    , self.nextion.getComponentByPath("bathroom.humidity")
+                                    , self.nextion.getComponentByPath("bathroom.battery")
+                                    , self.nextion.getComponentByPath("bathroom.online")) 
+        self.bluetooth.addDevice(self.bathroom.mac, lambda adv, rssi: self.bt_irq(self.bathroom, adv, rssi))
 
         #self.timer = machine.Timer(0).init(period=1000, mode=machine.Timer.PERIODIC, self.timer_irq))
 
         self.set_mode('home')
-        #self.bluetooth.start()
+        self.bluetooth.start()
 
     def __set_relay_callback(self, value):
         self.label['heater'].set(1 if value else 0)
@@ -142,5 +141,5 @@ class Thermostat:
         if isinstance(obj, xiaomiOnNextion):
             obj.decode_advertising(adv_message)
             obj.rssi = rssi
-            self.logic.setCurrentTemperature(self.BEDROOM_SENSOR_NO if obj == self.bedroom else self.BATHROOM_SENSOR_NO, obj.temperature)
+            self.logic.setCurrentTemperature(obj.temperature, self.BEDROOM_SENSOR_NO if obj == self.bedroom else self.BATHROOM_SENSOR_NO)
 

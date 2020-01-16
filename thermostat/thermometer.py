@@ -41,5 +41,5 @@ class xiaomi:
             adv_data = ubinascii.hexlify(adv_data).decode()
             adv_data = " ".join([adv_data[2*i:2*i+2] for i in range(0, int(len(adv_data)/2))])
             return False
-        self.last_message = time.ticks_ms()
+        self.last_message = utime.ticks_ms()
         return True
