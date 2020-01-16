@@ -1,5 +1,5 @@
-import ubinascii
-import utime
+import ubinascii # pylint: disable=import-error
+import utime # pylint: disable=import-error
 
 class xiaomi:
     def __init__(self, mac):

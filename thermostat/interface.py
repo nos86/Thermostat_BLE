@@ -1,4 +1,4 @@
-import utime
+import utime # pylint: disable=import-error
 import json
 from bluetooth_interface import BluetoothManager
 

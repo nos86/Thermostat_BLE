@@ -2,7 +2,7 @@
 #import esp
 #esp.osdebug(None)
 
-import machine
+import machine # pylint: disable=import-error
 rst_cause = machine.reset_cause()
 if rst_cause == machine.HARD_RESET:
     print("Hard Reset")
