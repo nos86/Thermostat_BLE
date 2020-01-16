@@ -46,3 +46,10 @@ class BluetoothManager:
                 if addr == mac:
                     callback(adv_data, rssi)
                     return  
+
+class DiscoverableBluetooth(BluetoothManager):
+    def bt_irq(self, event, data):
+        addr_type, addr, connectable, rssi, adv_data = data
+        if addr not in self.devices.keys():
+            self.devices[addr] = rssi
+            print("New device found: {} - rssi: {}".format(addr, rssi))
