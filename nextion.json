@@ -29,9 +29,28 @@
         {"type": "number", "id":4, "name": "humidity", "global":true},
         {"type": "number", "id":9, "name": "online", "global":true}
     ]},
-    {"id":4, "name": "setpoints", "components":[]},
-    {"id":5, "name": "advanced", "components":[]},
-    {"id":6, "name": "override", "components":[]},
-    {"id":7, "name": "override2", "components":[]},
+    {"id":4, "name": "setpoints", "components":[
+        {"type": "number", "id":9, "name": "t_high", "global":true},
+        {"type": "number", "id":10, "name": "t_med", "global":true},
+        {"type": "number", "id":11, "name": "t_low", "global":true},
+        {"type": "button", "id":8, "name": "m7", "global":true}
+    ]},
+    {"id":5, "name": "advanced", "components":[
+        {"type": "number", "name": "hysteresis", "id":9, "global":true},
+        {"type": "number", "name": "on_time", "id":10, "global":true}
+    ]},
+    {"id":6, "name": "override", "components":[
+        {"type": "button", "id":2, "name": "next"},
+        {"type": "button", "id":3, "name": "t_change"},
+        {"type": "button", "id":4, "name": "t_low"},
+        {"type": "button", "id":5, "name": "t_med"},
+        {"type": "button", "id":6, "name": "t_high"}
+    ]},
+    {"id":7, "name": "override2", "components":[
+        {"type": "button", "id":4, "name": "next"},
+        {"type": "number", "id":3, "name": "hour"},
+        {"type": "number", "id":1, "name": "min"},
+        {"type": "button", "id":6, "name": "ok"}
+    ]},
     {"id":8, "name": "schedule", "components":[]}
 ]
