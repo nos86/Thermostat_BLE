@@ -1,7 +1,7 @@
-import bluetooth
-import ubinascii
+import bluetooth # pylint: disable=import-error
+import ubinascii # pylint: disable=import-error
 import time
-from micropython import const
+from micropython import const # pylint: disable=import-error
 
 bt = bluetooth.BLE()
 

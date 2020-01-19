@@ -1,4 +1,4 @@
-import utime
+import utime # pylint: disable=import-error
 
 class Setpoint:
     def __init__(self, value):

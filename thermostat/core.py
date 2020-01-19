@@ -1,5 +1,5 @@
-import machine
-import utime
+import machine # pylint: disable=import-error
+import utime # pylint: disable=import-error
 
 class SensorLogic:
     def __init__(self, stateCallback=None, hysteresis=0.5, pin=18, minTimeOn=30):
