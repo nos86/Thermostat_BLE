@@ -1,28 +1,15 @@
 # This file is executed on every boot (including wake-boot from deepsleep)
 #import esp
 #esp.osdebug(None)
+import system as sys
 
-import machine # pylint: disable=import-error
-rst_cause = machine.reset_cause()
-if rst_cause == machine.HARD_RESET:
-    print("Hard Reset")
-elif rst_cause == machine.SOFT_RESET:
-    print("Soft Reset")
-elif rst_cause == machine.WDT_RESET:
-    print("WDT Reset")
+if __name__ == "__main__":
+    import machine # pylint: disable=import-error
+    sys.reset_cause = machine.reset_cause()
+    sys.print_reset_cause()
+    
+    import network # pylint: disable=import-error
+    sys.wlan0 = network.WLAN(network.STA_IF)
+    sys.wlan0.active(True)
+    sys.wlan0.connect('FASTWEB-1-4gF4Ljn4Cm1t', "tUX97mzzrK")
 
-
-import json
-import nextion
-from thermostat import MultiSensorLogic
-from thermostat.interface import Thermostat
-
-driver = nextion.Driver(timer=machine.Timer(1))
-
-with open("nextion.json", "r") as fp:
-    data = json.loads(fp.read())
-
-with open("programs.json", "r") as fp:
-    program = json.loads(fp.read())
-
-driver.loadPages(data)

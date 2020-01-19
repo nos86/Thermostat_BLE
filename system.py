@@ -1,17 +1,15 @@
-import network
-import ntptime
-import utime
+import machine # pylint: disable=import-error
 
-from thermostat import Thermostat
+global wlan0
+wlan0 = None
 
-iface = network.WLAN(network.STA_IF)
-iface.active(True)
-iface.connect("Musux_IoT", "#maibanale")
-utime.sleep(5)
-try:
-    ntptime.settime()
-except:
-    print("Unable to retrieve local time")
+global reset_cause
+reset_cause = None
 
-t = Thermostat(driver)
-
+def print_reset_cause():
+    if reset_cause == machine.HARD_RESET:
+        print("Hard Reset")
+    elif reset_cause == machine.SOFT_RESET:
+        print("Soft Reset")
+    elif reset_cause == machine.WDT_RESET:
+        print("WDT Reset")
