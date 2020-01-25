@@ -44,7 +44,7 @@ class BluetoothManager:
             addr_type, addr, connectable, rssi, adv_data = data
             for mac, callback in self.devices.items():
                 if addr == mac:
-                    callback(adv_data, rssi)
+                    callback(mac, adv_data, rssi)
                     return  
 
 class DiscoverableBluetooth(BluetoothManager):

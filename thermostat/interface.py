@@ -44,9 +44,7 @@ class Thermostat:
         self.__current_setpoint = None
         self.__next_schedule_time = None
         self.__last_date_update = 0
-        self.logic = MultiSensorLogic(self.__set_relay_callback, 0.5, minTimeOn=0, numberOfSensors=2)
 
-        self.bluetooth = BluetoothManager()
         self.schedule_path = schedule_path
         self.options = {'home':self.set_mode_home, 'away':self.set_mode_away, 'vacation':self.set_mode_vacation}
         
@@ -63,28 +61,22 @@ class Thermostat:
         for mode, fnct in self.options.items():
             self.nextion.register_listener("overview.prg_{}".format(mode), fnct)
 
+        self.logic = MultiSensorLogic(lambda value: self.label['heater'].set(1 if value else 0), 0.5, minTimeOn=0, numberOfSensors=2)
         
+        self.bluetooth = BluetoothManager()
         self.bedroom  = xiaomiOnNextion(bedroom_mac
                                     , self.nextion.getComponentByPath("bedroom.temperature")
                                     , self.nextion.getComponentByPath("bedroom.humidity")
                                     , self.nextion.getComponentByPath("bedroom.battery")
                                     , self.nextion.getComponentByPath("bedroom.online"))
-        self.bluetooth.addDevice(self.bedroom.mac, lambda adv, rssi: self.bt_irq(self.bedroom, adv, rssi))
-
+        self.bluetooth.addDevice(self.bedroom.mac, self.bt_irq)
         self.bathroom = xiaomiOnNextion(bathroom_mac
                                     , self.nextion.getComponentByPath("bathroom.temperature")
                                     , self.nextion.getComponentByPath("bathroom.humidity")
                                     , self.nextion.getComponentByPath("bathroom.battery")
                                     , self.nextion.getComponentByPath("bathroom.online")) 
-        self.bluetooth.addDevice(self.bathroom.mac, lambda adv, rssi: self.bt_irq(self.bathroom, adv, rssi))
-
-        #self.timer = machine.Timer(0).init(period=1000, mode=machine.Timer.PERIODIC, self.timer_irq))
-
-        self.set_mode('home')
+        self.bluetooth.addDevice(self.bathroom.mac, self.bt_irq)
         self.bluetooth.start()
-
-    def __set_relay_callback(self, value):
-        self.label['heater'].set(1 if value else 0)
 
         self.update_setpoints(force=True)
         
@@ -92,6 +84,12 @@ class Thermostat:
     def __initialize_settings(self):
         self.set_mode("home", is_starting=True)
 
+    def set_mode_home(self, event):
+        self.set_mode("home")
+    def set_mode_away(self, event):
+        self.set_mode("away")
+    def set_mode_vacation(self, event):
+        self.set_mode("vacation")
     def set_mode(self, mode=None, is_starting=False):
         if mode:
             self.settings[b'mode'] = mode.encode()
@@ -158,9 +156,15 @@ class Thermostat:
     def timer_irq(self):
         pass
 
-    def bt_irq(self, obj, adv_message, rssi):
-        if isinstance(obj, xiaomiOnNextion):
-            obj.decode_advertising(adv_message)
-            obj.rssi = rssi
-            self.logic.setCurrentTemperature(obj.temperature, self.BEDROOM_SENSOR_NO if obj == self.bedroom else self.BATHROOM_SENSOR_NO)
+    def bt_irq(self, mac, adv_message, rssi):
+        if mac == self.bathroom.mac:
+            obj = self.bathroom
+        elif mac == self.bedroom.mac:
+            obj = self.bedroom
+        else:
+            print("Unable to find the MAC") #FIXME: remove after debug and optimize inline if above
+            return
+        obj.decode_advertising(adv_message)
+        obj.rssi = rssi
+        self.logic.setCurrentTemperature(obj.temperature, self.BEDROOM_SENSOR_NO if obj == self.bedroom else self.BATHROOM_SENSOR_NO)
 
