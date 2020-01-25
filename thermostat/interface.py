@@ -43,15 +43,15 @@ class Thermostat:
         self.__current_setpoint = None
         self.__next_schedule_time = None
         self.__last_date_update = 0
-        self.schedule = {}
-        with open(schedule_path, 'r') as fp:
-            temp = json.load(fp)
-        for mode in ['home', 'away', 'vacation']:
-            self.schedule[mode] = Scheduler(mode, temp[mode]) #FIXME: setup working day
-            self.nextion.register_listener("overview.prg_{}".format(mode), lambda x, mode=mode: self.set_mode(mode))
         self.logic = MultiSensorLogic(self.__set_relay_callback, 0.5, minTimeOn=0, numberOfSensors=2)
 
         self.bluetooth = BluetoothManager()
+        self.schedule_path = schedule_path
+        self.options = {'home':self.set_mode_home, 'away':self.set_mode_away, 'vacation':self.set_mode_vacation}
+        
+        for mode, fnct in self.options.items():
+            self.nextion.register_listener("overview.prg_{}".format(mode), fnct)
+
         
         self.bedroom  = xiaomiOnNextion(bedroom_mac
                                     , self.nextion.getComponentByPath("bedroom.temperature")
@@ -94,11 +94,11 @@ class Thermostat:
         pass
 
     def extend_setpoint_to_next(self):
-        _, next_time, _ = self.schedule[self.__current_mode].getSetpoint(time=self.__next_schedule_time)
+        _, next_time, _ = self.schedule.getSetpoint(time=self.__next_schedule_time)
         self.set_override(self.__current_setpoint, next_time)
 
     def anticipate_next_setpoint(self):
-        _, next_time, next_temperature = self.schedule[self.__current_mode].getSetpoint()
+        _, next_time, next_temperature = self.schedule.getSetpoint()
         self.set_override(next_temperature, next_time)
 
     def set_override_for_duration(self, temperature, duration):
@@ -125,7 +125,7 @@ class Thermostat:
             current_setpoint = self.__override_temperature
             next_time = self.__override_next_time
         else:
-            current_setpoint, next_time, _ = self.schedule[self.__current_mode].getSetpoint()
+            current_setpoint, next_time, _ = self.schedule.getSetpoint()
         if(current_setpoint.value != self.__current_setpoint) or (next_time != self.__next_schedule_time) or force:
             self.__current_setpoint = current_setpoint.value
             self.__next_schedule_time = next_time

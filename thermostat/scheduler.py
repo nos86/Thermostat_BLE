@@ -1,4 +1,5 @@
 import utime # pylint: disable=import-error
+import json
 
 class Setpoint:
     def __init__(self, value):
@@ -14,8 +15,11 @@ class Setpoint:
         return "{:.1f} degC".format(self.value)
 
 class Scheduler:
-    def __init__(self, name, data):
-        self.name = name
+    def __init__(self, schedule_path, mode):
+        #FIXME: handle case where file is missing or it is corrupted
+        with open(schedule_path, 'r') as fp:
+            schedule_struct = json.load(fp)
+        data = schedule_struct[mode]
         if data:
             self.t_low = Setpoint(data['temperature']['low'])
             self.t_med = Setpoint(data['temperature']['medium'])
@@ -79,7 +83,6 @@ class Scheduler:
         data = [schedule[schedule_time[-1]]] * 24
         for t in schedule_time:
             pass
-
 
     def moveToNextDay(self, is_tomorrow_working=True):
         self.is_yesterday_working = self.is_today_working
