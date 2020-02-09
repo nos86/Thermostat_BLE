@@ -1,3 +1,4 @@
 programs.json
 .vscode
 pymakr.conf
+secret.py
