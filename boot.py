@@ -2,6 +2,7 @@
 #import esp
 #esp.osdebug(None)
 import system as sys
+import secret
 
 if __name__ == "__main__":
     import machine # pylint: disable=import-error
@@ -11,5 +12,6 @@ if __name__ == "__main__":
     import network # pylint: disable=import-error
     sys.wlan0 = network.WLAN(network.STA_IF)
     sys.wlan0.active(True)
-    sys.wlan0.connect('FASTWEB-1-4gF4Ljn4Cm1t', "tUX97mzzrK")
+    sys.wlan0.connect(secret.WIFI_SSID, secret.WIFI_PASS)
+    
 

@@ -29,12 +29,15 @@ class UART(machine.UART):
         self.callback = callback
 
     def check_incoming_data(self, event):
-        if self.background_listener == False:
-            return
-        if self.any():
-            data = self._read_internal()
-            if data:
-                self.callback(data)
+        try:
+            if self.background_listener == False:
+                return
+            if self.any():
+                data = self._read_internal()
+                if data:
+                    self.callback(data)
+        except Exception as e: 
+            print("UART::check_data failed: {}".format(e))
 
     @staticmethod
     def get_nx_error_message(err_code_char):

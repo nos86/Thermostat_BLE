@@ -46,20 +46,19 @@ class Thermostat:
         self.__last_date_update = 0
 
         self.schedule_path = schedule_path
-        self.options = {'home':self.set_mode_home, 'away':self.set_mode_away, 'vacation':self.set_mode_vacation}
         
         #Load settings
         try:
-            f = open(setting_path, "r+b")
-            self.settings = btree.open(f)
+            self.setting_file = open(setting_path, "r+b")
+            self.settings = btree.open(self.setting_file)
             self.set_mode(self.settings[b'mode'].decode(), is_starting=True)
         except OSError:
-            f = open(setting_path, "w+b")
-            self.settings = btree.open(f)
+            self.setting_file = open(setting_path, "w+b")
+            self.settings = btree.open(self.setting_file)
             self.__initialize_settings()
 
-        for mode, fnct in self.options.items():
-            self.nextion.register_listener("overview.prg_{}".format(mode), fnct)
+        for mode in ['home', 'away', 'vacation']:
+            self.nextion.register_listener("overview.prg_{}".format(mode), lambda x : self.set_mode(mode))
 
         self.logic = MultiSensorLogic(lambda value: self.label['heater'].set(1 if value else 0), 0.5, minTimeOn=0, numberOfSensors=2)
         
@@ -84,12 +83,6 @@ class Thermostat:
     def __initialize_settings(self):
         self.set_mode("home", is_starting=True)
 
-    def set_mode_home(self, event):
-        self.set_mode("home")
-    def set_mode_away(self, event):
-        self.set_mode("away")
-    def set_mode_vacation(self, event):
-        self.set_mode("vacation")
     def set_mode(self, mode=None, is_starting=False):
         if mode:
             self.settings[b'mode'] = mode.encode()

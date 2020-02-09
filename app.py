@@ -14,9 +14,14 @@ with open("nextion.json", "r") as fp:
     driver.loadPages(json.loads(fp.read()))
 
 timeout = 0
-while((sys.wlan0.isconnected()==False) or (timeout>5000)):
+print("Trying to connect to network..", end='.')
+while((sys.wlan0.isconnected()==False) and (timeout<5000)):
     utime.sleep_ms(200)
-    timeout += 0.2
+    timeout += 200
+    print(".", end="")
+else:
+    print("failed", end='')
+print("")
 
 try:
     ntptime.settime()
