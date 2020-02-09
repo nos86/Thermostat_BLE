@@ -58,7 +58,7 @@ class Thermostat:
             self.__initialize_settings()
 
         for mode in ['home', 'away', 'vacation']:
-            self.nextion.register_listener("overview.prg_{}".format(mode), lambda x : self.set_mode(mode))
+            self.nextion.register_listener("overview.prg_{}".format(mode), lambda x, mode=mode : self.set_mode(mode))
 
         self.logic = MultiSensorLogic(lambda value: self.label['heater'].set(1 if value else 0), 0.5, minTimeOn=0, numberOfSensors=2)
         

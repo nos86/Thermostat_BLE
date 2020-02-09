@@ -28,5 +28,6 @@ try:
 except:
     print("Unable to retrieve local time")
 
-t = Thermostat(driver)
+global app
+app = Thermostat(driver)
 

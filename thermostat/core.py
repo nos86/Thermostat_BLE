@@ -62,7 +62,6 @@ class MultiSensorLogic(SensorLogic):
         self.lastReading = [utime.time()] * numberOfSensors
         self.reading = [None] * numberOfSensors #New variable that handles multi-sensors
         self.numberOfSensors = numberOfSensors
-        
 
     def setCurrentTemperature(self, value, sensor_id = -1, ignoreMinTime=False):
         if sensor_id > -1:
