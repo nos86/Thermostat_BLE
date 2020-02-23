@@ -16,9 +16,6 @@ class SensorLogic:
         self.state = False
         self.pin.value(True)
 
-    def periodic_check(self):
-        self.setCurrentTemperature(self.current)
-
     def setCurrentTemperature(self, value, ignoreMinTime=False):
         self.current = value
         if (self.setpoint is None) or (self.current is None):

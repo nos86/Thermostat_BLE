@@ -9,7 +9,7 @@ import nextion
 from thermostat import MultiSensorLogic
 from thermostat.interface import Thermostat
 
-driver = nextion.Driver(timer=machine.Timer(1))
+driver = nextion.Driver(timer=machine.Timer(1), timeout=300)
 with open("nextion.json", "r") as fp:
     driver.loadPages(json.loads(fp.read()))
 
@@ -19,9 +19,7 @@ while((sys.wlan0.isconnected()==False) and (timeout<5000)):
     utime.sleep_ms(200)
     timeout += 200
     print(".", end="")
-else:
-    print("failed", end='')
-print("")
+print("failed" if timeout >= 5000 else "OK")
 
 try:
     ntptime.settime()
@@ -32,5 +30,4 @@ global app
 app = Thermostat(driver)
 
 app.nextion.uart.debug_send=False
-app.nextion.uart.debug_receive=False
-app.nextion.uart.debug_uart_receive = False
+app.nextion.uart.debug_receive=Falseapp.nextion.uart.debug_uart_receive = False

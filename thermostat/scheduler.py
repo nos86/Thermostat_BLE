@@ -2,11 +2,18 @@ import utime # pylint: disable=import-error
 import json
 
 class Setpoint:
-    def __init__(self, value):
+    def __init__(self, value, component=None):
+        self.component = component
         self.set(value)
     
     def set(self, value):
         self.value = float(value)
+        if self.component:
+            self.component.set(int(10*self.value))
+
+    def updateFromDisplay(self):
+        self.value = float(self.component.get())/10
+
 
     def __str__(self):
         return "{:.1f}".format(self.value)
@@ -15,15 +22,28 @@ class Setpoint:
         return "{:.1f} degC".format(self.value)
 
 class Scheduler:
-    def __init__(self, schedule_path, mode):
+    def __init__(self, schedule_path, t_high_comp, t_med_comp, t_low_comp, mode=None):
+        self.schedule_path = schedule_path
+        self.components = {'t_high': t_high_comp, 't_med':t_med_comp, 't_low': t_low_comp}
+        if mode:
+            self.load(mode)
+    
+    def updateSetpoints(self):
+        utime.sleep_ms(100)
+        for setpoint in [self.t_high, self.t_med, self.t_low]:
+            setpoint.updateFromDisplay()
+
+    def load(self, mode):
         #FIXME: handle case where file is missing or it is corrupted
-        with open(schedule_path, 'r') as fp:
+        self.mode = mode
+        self.override = False
+        with open(self.schedule_path, 'r') as fp:
             schedule_struct = json.load(fp)
         data = schedule_struct[mode]
         if data:
-            self.t_low = Setpoint(data['temperature']['low'])
-            self.t_med = Setpoint(data['temperature']['medium'])
-            self.t_high = Setpoint(data['temperature']['high'])
+            self.t_low = Setpoint(data['temperature']['low'], self.components['t_low'])
+            self.t_med = Setpoint(data['temperature']['medium'], self.components['t_med'])
+            self.t_high = Setpoint(data['temperature']['high'], self.components['t_high'])
 
             self.schedule_working_days = {}
             for time, temp in data['timing']['working'].items():
@@ -53,10 +73,12 @@ class Scheduler:
         self.is_today_working = True
         self.is_tomorrow_working = True
 
+    def isModeChanged(self, new_mode):
+        return new_mode != self.mode
+
     def getSetpoint(self, time=None):
         if time is None:
-            (_,_,_,hr, mn, _,_,_) = utime.localtime()
-            time = hr * 60 + mn
+            time = self.__getTime()
         yesterday_program = self.schedule_working_days if self.is_today_working else self.schedule_holidays
         today_program = self.schedule_working_days if self.is_today_working else self.schedule_holidays
         tomorrow_program = self.schedule_working_days if self.is_tomorrow_working else self.schedule_holidays
@@ -118,3 +140,6 @@ class Scheduler:
     def getTimeString(cls, time):
         return "{:02d}:{:02d}".format(int(time/60), time%60)
 
+    def __getTime(self):
+        (_,_,_,hr, mn, _,_,_) = utime.localtime()
+        return hr * 60 + mn
