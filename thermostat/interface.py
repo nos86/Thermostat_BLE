@@ -25,20 +25,21 @@ class xiaomiOnNextion(xiaomi):
 class Thermostat:
     BEDROOM_SENSOR_NO = 0
     BATHROOM_SENSOR_NO = 1
-    def __init__(self, nextion_driver, schedule_path ="/programs.json", setting_path="/app_setting.db", bedroom_mac = b'Le\xa8\xdd\xd4L', bathroom_mac = b'X-41\xac\x9f'):
+
+    def __init__(self, nextion_driver, schedule_path="/programs.json", setting_path="/app_setting.db", bedroom_mac=b'Le\xa8\xdd\xd4L', bathroom_mac=b'X-41\xac\x9f'):
         self.nextion = nextion_driver
+        self.schedule_path = schedule_path
         self.label = {
-            "date" : self.nextion.getComponentByPath("overview.date"),
-            "time" : self.nextion.getComponentByPath("overview.time"),
-            "target" : self.nextion.getComponentByPath("overview.target"),
-            "endtime" : self.nextion.getComponentByPath("overview.endtime"),
-            "override" : self.nextion.getComponentByPath("overview.override"),
+            "date": self.nextion.getComponentByPath("overview.date"),
+            "time": self.nextion.getComponentByPath("overview.time"),
+            "target": self.nextion.getComponentByPath("overview.target"),
+            "endtime": self.nextion.getComponentByPath("overview.endtime"),
+            "override": self.nextion.getComponentByPath("overview.override"),
             "outside_temperature": self.nextion.getComponentByPath("overview.out_temp"),
             "outside_humidity": self.nextion.getComponentByPath("overview.out_hum"),
             "heater": self.nextion.getComponentByPath("overview.heater"),
             "program": self.nextion.getComponentByPath("overview.program")
         }
-        self.schedule_path = schedule_path
         # Load settings
         try:
             self.setting_file = open(setting_path, "r+b")
@@ -50,22 +51,18 @@ class Thermostat:
             self.__initialize_settings()
 
         for mode in ['home', 'away', 'vacation']:
-            self.nextion.register_listener("overview.prg_{}".format(mode), lambda x, mode=mode : self.set_mode(mode))
+            self.nextion.register_listener("overview.prg_{}".format(
+                mode), lambda x, mode=mode: self.set_mode(mode))
 
-        self.logic = MultiSensorLogic(lambda value: self.label['heater'].set(1 if value else 0), 0.5, minTimeOn=0, numberOfSensors=2)
-        
+        self.logic = MultiSensorLogic(lambda value: self.label['heater'].set(
+            1 if value else 0), 0.5, minTimeOn=0, numberOfSensors=2)
+
         self.bluetooth = BluetoothManager()
-        self.bedroom  = xiaomiOnNextion(bedroom_mac
-                                    , self.nextion.getComponentByPath("bedroom.temperature")
-                                    , self.nextion.getComponentByPath("bedroom.humidity")
-                                    , self.nextion.getComponentByPath("bedroom.battery")
-                                    , self.nextion.getComponentByPath("bedroom.online"))
+        self.bedroom = xiaomiOnNextion(bedroom_mac, self.nextion.getComponentByPath("bedroom.temperature"), self.nextion.getComponentByPath(
+            "bedroom.humidity"), self.nextion.getComponentByPath("bedroom.battery"), self.nextion.getComponentByPath("bedroom.online"))
         self.bluetooth.addDevice(self.bedroom.mac, self.bt_irq)
-        self.bathroom = xiaomiOnNextion(bathroom_mac
-                                    , self.nextion.getComponentByPath("bathroom.temperature")
-                                    , self.nextion.getComponentByPath("bathroom.humidity")
-                                    , self.nextion.getComponentByPath("bathroom.battery")
-                                    , self.nextion.getComponentByPath("bathroom.online")) 
+        self.bathroom = xiaomiOnNextion(bathroom_mac, self.nextion.getComponentByPath("bathroom.temperature"), self.nextion.getComponentByPath(
+            "bathroom.humidity"), self.nextion.getComponentByPath("bathroom.battery"), self.nextion.getComponentByPath("bathroom.online"))
         self.bluetooth.addDevice(self.bathroom.mac, self.bt_irq)
         self.bluetooth.start()
 
