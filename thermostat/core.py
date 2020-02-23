@@ -68,6 +68,8 @@ class MultiSensorLogic(SensorLogic):
             self.reading[sensor_id] = value
             self.lastReading[sensor_id] = utime.time()
             reads = [self.reading[id] for id in range(self.numberOfSensors) if self.reading[id] is not None and self.isReadingUpdated(id)]
+            if len(reads)==0:
+                return self.setpoint #FIXME: potential bug
             value = sum(reads)/len(reads)
         return super().setCurrentTemperature(value, ignoreMinTime=ignoreMinTime)
 

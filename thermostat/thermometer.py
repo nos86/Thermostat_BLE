@@ -13,7 +13,7 @@ class xiaomi:
             self.mac = b"".join([bytes([int(n,16)]) for n in mac.split(":")])
         self.temperature = None
         self.humidity = None
-        self.battery = None
+        self.battery = 100
         self.rssi = 0
         self.last_message = utime.time()
 
@@ -27,7 +27,6 @@ class xiaomi:
         return (utime.time() - self.last_message)
 
     def decode_advertising(self, adv_data):
-        n = adv_data[11]
         if adv_data[18] == 0x0D: # Temperature&Humidity
             self.temperature = (adv_data[21] + adv_data[22] * 256) / 10
             self.humidity = (adv_data[23] + adv_data[24] * 256) / 10
