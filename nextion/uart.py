@@ -58,7 +58,7 @@ class UART(machine.UART):
         if isinstance(value,str):
             message = key + '="' + str(value) + '"'
         else:
-            message = key + '=' + str(value)
+            message = key + '=' + str(value) 
         return self.write(message, read_feedback=read_feedback)
 
     def write(self, message, read_feedback=False, check_return=True):
@@ -119,6 +119,7 @@ class UART(machine.UART):
             pass
         else:
             raise ValueError("Response Error with unknown code: {}".format(bytes_buf))
+        return bytes_buf
 
     def readSuper(self, len):
         return super().read(len)
