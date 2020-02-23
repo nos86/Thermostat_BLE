@@ -40,8 +40,8 @@ class Text(Component):
 		else:
 			self.get()
 
-	def get(self):
-		self.value = self.driver.getText(self.name)
+	def get(self, fullpath=True):
+		self.value = self.driver.getText(self.getFullpath() if fullpath else self.name)
 		return self.value
 
 	def set(self, value, fullpath=False):
@@ -53,8 +53,8 @@ class Button(Text):
 	pass
 
 class Number(Text):
-	def get(self):
-		self.value = self.driver.getValue(self.name)
+	def get(self, fullpath=True):
+		self.value = self.driver.getValue(self.getFullpath() if fullpath else self.name)
 		return self.value
 
 	def set(self, value, fullpath=True):
