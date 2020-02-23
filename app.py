@@ -31,3 +31,6 @@ except:
 global app
 app = Thermostat(driver)
 
+app.nextion.uart.debug_send=False
+app.nextion.uart.debug_receive=False
+app.nextion.uart.debug_uart_receive = False

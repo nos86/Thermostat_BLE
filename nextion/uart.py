@@ -2,7 +2,9 @@ import machine # pylint: disable=import-error
 import ubinascii # pylint: disable=import-error
 
 class UART(machine.UART):
-    debug=False
+    debug_receive=False
+    debug_send=False
+    debug_uart_receive=False
     background_listener=False
     ERRORS = {
         b'\x00' : "Invalid instruction",
@@ -60,6 +62,8 @@ class UART(machine.UART):
         return self.write(message, read_feedback=read_feedback)
 
     def write(self, message, read_feedback=False, check_return=True):
+        if self.debug_send:
+            print("Send message: {}".format(message))
         message = message.encode()
         message += b"\xFF\xFF\xFF"
         self.background_listener = False
@@ -126,13 +130,15 @@ class UART(machine.UART):
         while self.any()>0 or init:
             init = False
             read_char = super().read(1)
+            if self.debug_uart_receive:
+                print("UART::read {}".format(read_char))
             bytes_buf.append(read_char)
             if read_char == b'\xff':
                 count += 1
             else:
                 count = 0
             if count == 3:
-                if self.debug:
+                if self.debug_receive:
                     message= " ".join([ubinascii.hexlify(b).decode() for b in bytes_buf[:-3]])
                     print("Received data: {}".format(message))
                 return bytes_buf[:-3]

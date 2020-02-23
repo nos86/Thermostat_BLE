@@ -52,6 +52,10 @@ class Driver(object):
         if page_id in self.registered_events.keys():
             if component_id in self.registered_events[page_id]:
                 self.registered_events[page_id][component_id](ord(event[3]))
+            else:
+                print("Page:{page_id} unknown component: {component_id}".format(page_id=page_id, component_id=component_id))
+        else:
+            print("Unknown page:{page_id} / component {component_id}".format(page_id=page_id, component_id=component_id))
 
     def getPageAndComponentIdByPath(self, fullpath):
         [page, component] = fullpath.split('.')
