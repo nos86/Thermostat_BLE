@@ -38,16 +38,8 @@ class Thermostat:
             "heater": self.nextion.getComponentByPath("overview.heater"),
             "program": self.nextion.getComponentByPath("overview.program")
         }
-        #Variable initialization
-        self.__override_temperature = None
-        self.__override_next_time = None
-        self.__current_setpoint = None
-        self.__next_schedule_time = None
-        self.__last_date_update = 0
-
         self.schedule_path = schedule_path
-        
-        #Load settings
+        # Load settings
         try:
             self.setting_file = open(setting_path, "r+b")
             self.settings = btree.open(self.setting_file)
@@ -102,27 +94,6 @@ class Thermostat:
         self.label['target'].set(10*self.__current_setpoint)
         self.logic.periodic_check()
 
-    def displayScheduler(self):
-        pass
-
-    def extend_setpoint_to_next(self):
-        _, next_time, _ = self.schedule.getSetpoint(time=self.__next_schedule_time)
-        self.set_override(self.__current_setpoint, next_time)
-
-    def anticipate_next_setpoint(self):
-        _, next_time, next_temperature = self.schedule.getSetpoint()
-        self.set_override(next_temperature, next_time)
-
-    def set_override_for_duration(self, temperature, duration):
-        time = self.__getTime() + duration
-        time -= 1440 if time > 1440 else 0
-        self.set_override(temperature, time)
-
-    def set_override(self, temperature, next_time):
-        self.__override_temperature = temperature
-        self.__override_next_time = next_time
-        self.update_setpoints()
-    
     def clear_override(self):
         self.set_override(None, None)
 
